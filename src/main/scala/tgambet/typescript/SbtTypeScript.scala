@@ -73,7 +73,7 @@ object SbtTypeScript extends AutoPlugin {
   override def projectSettings = defaults ++ inTask(typescript)(
     SbtJsTask.jsTaskSpecificUnscopedSettings ++ Seq(
       shellSource := {
-        ResourceHelper.copyResourceTo(
+        ResourceHelper.wrapTypescriptModuleAndCopyTo(
           (target in Plugin).value / moduleName.value,
           getClass.getClassLoader.getResource("typescript/tsc.js"),
           streams.value.cacheDirectory / "copy-resource"

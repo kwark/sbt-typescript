@@ -1,4 +1,4 @@
-/*global process, require */
+/*global process, require, __dirname*/
 
 (function () {
     "use strict";
@@ -13,26 +13,30 @@
     var target = args[TARGET_ARG];
     var options = JSON.parse(args[OPTIONS_ARG]);
 
+    var TypeScript = require('./tsc');
+
     console.log('TypeScript args:', args);
     console.log('Started from directory:', __dirname);
 
-    args = ['--outDir', options.outDir, '--module', options.module];
+    var typeScriptArgs = ['--outDir', options.outDir, '--module', options.module];
     if (options.targetES5) {
-        args = args.concat(['--target', 'ES5']);
+        typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
     }
     if (options.sourceMap) {
-        args.push('--sourcemap');
+        typeScriptArgs.push('--sourcemap');
     }
     if (options.noImplicitAny) {
-        args.push('--noImplicitAny');
+        typeScriptArgs.push('--noImplicitAny');
     }
     if (options.removeComments) {
-        args.push('--removeComments');
+        typeScriptArgs.push('--removeComments');
     }
-    args.push(sourceFileMappings[0][0]);
-    process.argv = args;
+    typeScriptArgs.push(sourceFileMappings[0][0]);
 
     console.log('Passing args to tsc:', process.argv);
-    
-    require('./tsc');
+    var io = TypeScript.IO;
+    io.arguments = typeScriptArgs;
+
+    var batch = new TypeScript.BatchCompiler(io);
+    batch.batchCompile();
 })();
