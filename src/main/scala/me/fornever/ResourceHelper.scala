@@ -82,8 +82,7 @@ object ResourceHelper {
     val reverted = lines.reverse
     val lastLine #:: other = reverted
     val filtered = other.dropWhile(!_.trim.startsWith("TypeScript"))
-    val result = filtered.reverse.append(lastLine)
-    val resultText = result.mkString("\n")
+    val resultText = filtered.reverse.mkString("\n") + lastLine
     new ByteArrayInputStream(resultText.getBytes(encoding))
   }
 
