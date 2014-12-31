@@ -17,7 +17,9 @@ resolvers ++= Seq(
   "Typesafe Snapshots Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 )
 
-addSbtPlugin("com.typesafe.sbt" %% "sbt-js-engine" % "1.0.0")
+lazy val jsEngine = uri("https://github.com/sbt/sbt-js-engine.git")
+
+lazy val root = project.in( file(".") ).dependsOn( jsEngine )
 
 publishMavenStyle := false
 
