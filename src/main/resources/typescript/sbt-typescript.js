@@ -22,7 +22,7 @@
     console.log('TypeScript args:', args);
     console.log('Started from directory:', __dirname);
 
-    var typeScriptArgs = ['--outDir', outputDirectory, '--module', options.module, '--out', options.out];
+    var typeScriptArgs = ['--outDir', outputDirectory,'--out', inputFileName+".js"];
     if (options.targetES5) {
         typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
     }

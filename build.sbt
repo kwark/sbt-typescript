@@ -6,7 +6,7 @@ name := "sbt-typescript"
 
 version := "1.0.0"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.10.4"
 
 scalacOptions += "-feature"
 
@@ -16,6 +16,8 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("snapshots"),
   "Typesafe Snapshots Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 )
+
+libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
 
 lazy val jsEngine = uri("https://github.com/sbt/sbt-js-engine.git")
 
