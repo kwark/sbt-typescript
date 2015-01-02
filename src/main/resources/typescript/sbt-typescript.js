@@ -21,12 +21,13 @@
 
     var baseName = path.basename(inputFileName, '.ts');
     var outputFileName = baseName +".js"
+    var outputFilePath = path.join(outputDirectory, outputFileName)
 
     console.log('TypeScript args:', args);
     console.log('Started from directory:', __dirname);
     console.log('Output file:', outputFileName);
 
-    var typeScriptArgs = ['--outDir', outputDirectory,'--out', outputFileName];
+    var typeScriptArgs = ['--outDir', outputDirectory,'--out', outputFilePath];
     if (options.targetES5) {
         typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
     }
@@ -58,7 +59,7 @@
             source: inputFileName,
             result: {
                 filesRead: [inputFileName],
-                filesWritten: [path.join(outputDirectory, outputFileName)]
+                filesWritten: [outputFilePath]
             }
         });
     } catch (error) {
