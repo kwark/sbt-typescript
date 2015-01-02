@@ -20,19 +20,21 @@
         outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[0][1]));
 
     var baseName = path.basename(inputFileName, '.ts');
-    var outputFileName = baseName +".js"
+    var outputFileName = baseName +".ts.js"
     var outputFilePath = path.join(outputDirectory, outputFileName)
+    var generatedFiles = [ outputFilePath];
 
     console.log('TypeScript args:', args);
     console.log('Started from directory:', __dirname);
     console.log('Output file:', outputFileName);
 
-    var typeScriptArgs = ['--outDir', outputDirectory,'--out', outputFilePath];
+    var typeScriptArgs = ['--out', outputFilePath];
     if (options.targetES5) {
         typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
     }
     if (options.sourceMap) {
         typeScriptArgs.push('--sourcemap');
+	generatedFiles.push(outputFilePath+".map");
     }
     if (options.noImplicitAny) {
         typeScriptArgs.push('--noImplicitAny');
@@ -59,7 +61,7 @@
             source: inputFileName,
             result: {
                 filesRead: [inputFileName],
-                filesWritten: [outputFilePath]
+                filesWritten: generatedFiles
             }
         });
     } catch (error) {
