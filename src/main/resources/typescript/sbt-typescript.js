@@ -19,10 +19,14 @@
     var inputFileName = sourceFileMappings[0][0],
         outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[0][1]));
 
+    var baseName = path.basename(inputFileName, '.ts');
+    var outputFileName = baseName +".js"
+
     console.log('TypeScript args:', args);
     console.log('Started from directory:', __dirname);
+    console.log('Output file:', outputFileName);
 
-    var typeScriptArgs = ['--outDir', outputDirectory,'--out', inputFileName+".js"];
+    var typeScriptArgs = ['--outDir', outputDirectory,'--out', outputFileName];
     if (options.targetES5) {
         typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
     }
@@ -50,13 +54,11 @@
         var batch = new TypeScript.BatchCompiler(io);
         batch.batchCompile();
 
-        var baseName = path.basename(inputFileName, '.ts');
-
         results.push({
             source: inputFileName,
             result: {
                 filesRead: [inputFileName],
-                filesWritten: [path.join(outputDirectory, baseName + '.js')]
+                filesWritten: [path.join(outputDirectory, outputFileName)]
             }
         });
     } catch (error) {
