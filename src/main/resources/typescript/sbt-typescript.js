@@ -1,13 +1,28 @@
 /*global process, require, __dirname*/
 
+/*
+ * transpile a number of files.
+ *
+ * Arguments:
+ * 0 - name given to the command invoking the script (unused)
+ * 1 - filepath of this script (unused)
+ * 2 - array of file paths to the files to be converted
+ * 3 - the target folder to write to (unused - not required)
+ * 4 - jshint options as a Json object
+ *
+ * Json array tuples are sent to stdout for each file in error (if any). Each tuple is an array where the
+ * element 0 corresponds to the file path of the file linted, and element 1 is JSHINT.errors.
+ */
 (function () {
     "use strict";
 
-    var path = require('path'),
-        TypeScript = require('./tsc');
+    var path = require('path');
+    var console = require("console");
+    //console.log(__dirname);
+
+    var ts = require('./tsc');
 
     var args = process.argv;
-
     var SOURCE_FILE_MAPPINGS_ARG = 2;
     var TARGET_ARG = 3;
     var OPTIONS_ARG = 4;
@@ -20,57 +35,52 @@
         outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[0][1]));
 
     var baseName = path.basename(inputFileName, '.ts');
-    var outputFileName = baseName +".ts.js"
-    var outputFilePath = path.join(outputDirectory, outputFileName)
-    var generatedFiles = [ outputFilePath];
+    var outputFileName = baseName +".js";
+    var outputFilePath = path.join(outputDirectory, outputFileName);
+    var generatedFiles = [ outputFilePath ];
 
-    console.log('TypeScript args:', args);
-    console.log('Started from directory:', __dirname);
-    console.log('Output file:', outputFileName);
+    //console.log('Output file:', outputFilePath);
 
-    var typeScriptArgs = ['--out', outputFilePath];
-    if (options.targetES5) {
-        typeScriptArgs = typeScriptArgs.concat(['--target', 'ES5']);
-    }
     if (options.sourceMap) {
-        typeScriptArgs.push('--sourcemap');
-	generatedFiles.push(outputFilePath+".map");
+	    generatedFiles.push(outputFilePath+".map");
     }
-    if (options.noImplicitAny) {
-        typeScriptArgs.push('--noImplicitAny');
-    }
-    if (options.removeComments) {
-        typeScriptArgs.push('--removeComments');
-    }
-    typeScriptArgs.push(inputFileName);
-
-    console.log('Passing args to tsc:', typeScriptArgs);
-
-    var io = TypeScript.IO;
-    io.arguments = typeScriptArgs;
-    io.quit = function () {
-    };
 
     var results = [], problems = [];
 
-    try {
-        var batch = new TypeScript.BatchCompiler(io);
-        batch.batchCompile();
+    var host = ts.createCompilerHost(options);
+    var program = ts.createProgram([inputFileName], options, host);
+    var checker = ts.createTypeChecker(program, true);
+    var result = checker.emitFiles();
 
-        results.push({
-            source: inputFileName,
-            result: {
-                filesRead: [inputFileName],
-                filesWritten: generatedFiles
-            }
-        });
-    } catch (error) {
-        problems.push({
-            message: error.toString(),
-            severity: 'error'
-        });
-    }
+    var actualErrors = 0;
+    var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
+    allDiagnostics.forEach(function (diagnostic) {
+        var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
+		var lineStarts = diagnostic.file.getLineStarts();
+		//console.log(diagnostic);
+		problems.push({
+			message: diagnostic.messageText,
+			lineNumber: lineChar.line,
+            characterOffset: lineChar.character,
+			source: diagnostic.file.filename,
+			severity: diagnostic.category == 0 ? "warning" : "error",
+			lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line-1], lineStarts[lineChar.line]).replace(/\n$/,"").replace(/\r$/,"")
+		});
+		actualErrors++;
+    });
+	
 
-    console.log(JSON.stringify({results: results, problems: problems}));
+	if (actualErrors == 0) {
+		results.push({
+			source: inputFileName,
+			result: {
+				filesRead: [inputFileName],
+				filesWritten: generatedFiles
+			}
+		});
+	}
+
+    //console.log(JSON.stringify({results: results, problems: problems}));
     console.log("\u0010" + JSON.stringify({results: results, problems: problems}));
+
 })();

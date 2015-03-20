@@ -2,9 +2,9 @@ sbtPlugin := true
 
 organization := "com.typesafe.sbt"
 
-name := "sbt-typescript"
+name := "sbt-typescript-extjs"
 
-version := "1.0.0"
+version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
@@ -19,9 +19,7 @@ resolvers ++= Seq(
 
 libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
 
-lazy val jsEngine = uri("https://github.com/sbt/sbt-js-engine.git")
-
-lazy val root = project.in( file(".") ).dependsOn( jsEngine )
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.2")
 
 publishMavenStyle := false
 

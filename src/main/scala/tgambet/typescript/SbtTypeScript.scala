@@ -11,7 +11,7 @@ object Import {
 
   object TypeScriptKeys {
 
-    val typescript = TaskKey[Seq[File]]("typescript", "Invoke the TypeScript compiler.")
+    val typescript = TaskKey[Seq[File]]("tsext", "Invoke the TypeScript compiler.")
 
     val modules = SettingKey[Seq[String]]("typescript-modules", "A list of file names to be exported as modules (using TypeScript --out parameter).")
 
@@ -79,7 +79,7 @@ object SbtTypeScript extends AutoPlugin {
           streams.value.cacheDirectory / "copy-resource"
         )
 
-        ResourceHelper.wrapTypescriptModuleAndCopyTo(
+        ResourceHelper.copyResourceTo(
           (target in Plugin).value / moduleName.value,
           getClass.getClassLoader.getResource("typescript/tsc.js"),
           streams.value.cacheDirectory / "copy-resource"
@@ -90,12 +90,11 @@ object SbtTypeScript extends AutoPlugin {
           shellFile.value,
           streams.value.cacheDirectory / "copy-resource"
         )
-      }
-    ) ++
+      }) ++
     inConfig(Assets)(typeScriptSettings) ++
     inConfig(TestAssets)(typeScriptSettings) ++
     Seq(
-      moduleName := "typescript",
+      moduleName := "txext",
       shellFile := getClass.getClassLoader.getResource("typescript/sbt-typescript.js"),
 
       taskMessage in Assets := "TypeScript compiling",
