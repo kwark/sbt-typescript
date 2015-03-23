@@ -21,12 +21,18 @@ libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.2")
 
-publishMavenStyle := false
+publishMavenStyle := true
 
-publishTo := {
-  if (isSnapshot.value) Some(Classpaths.sbtPluginSnapshots)
-  else Some(Classpaths.sbtPluginReleases)
+publishTo <<= version {
+  (v: String) =>
+    val nexus = "http://dev-colab.awv.vlaanderen.be/nexus/content/repositories/"
+    if (v.trim.endsWith("SNAPSHOT"))
+      Some("dev-colab snapshots" at nexus + "snapshots")
+    else
+      Some("dev-colab releases" at nexus + "releases")
 }
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 scriptedSettings
 
