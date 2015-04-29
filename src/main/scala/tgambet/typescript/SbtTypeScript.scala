@@ -94,7 +94,7 @@ object SbtTypeScript extends AutoPlugin {
     inConfig(Assets)(typeScriptSettings) ++
     inConfig(TestAssets)(typeScriptSettings) ++
     Seq(
-      moduleName := "txext",
+      moduleName := "tsext",
       shellFile := getClass.getClassLoader.getResource("typescript/sbt-typescript.js"),
 
       taskMessage in Assets := "TypeScript compiling",

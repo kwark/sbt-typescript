@@ -25,7 +25,7 @@ publishMavenStyle := true
 
 publishTo <<= version {
   (v: String) =>
-    val nexus = "http://dev-colab.awv.vlaanderen.be/nexus/content/repositories/"
+    val nexus = "https://collab.mow.vlaanderen.be/nexus/content/repositories/"
     if (v.trim.endsWith("SNAPSHOT"))
       Some("dev-colab snapshots" at nexus + "snapshots")
     else
