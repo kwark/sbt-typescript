@@ -24,11 +24,9 @@
 
     var args = process.argv;
     var SOURCE_FILE_MAPPINGS_ARG = 2;
-    var TARGET_ARG = 3;
     var OPTIONS_ARG = 4;
 
     var sourceFileMappings = JSON.parse(args[SOURCE_FILE_MAPPINGS_ARG]);
-    var target = args[TARGET_ARG];
     var options = JSON.parse(args[OPTIONS_ARG]);
 
     var inputFileName = sourceFileMappings[0][0],
@@ -55,18 +53,20 @@
     var actualErrors = 0;
     var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
     allDiagnostics.forEach(function (diagnostic) {
-        var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
-		var lineStarts = diagnostic.file.getLineStarts();
-		//console.log(diagnostic);
-		problems.push({
-			message: diagnostic.messageText,
-			lineNumber: lineChar.line,
-            characterOffset: lineChar.character,
-			source: diagnostic.file.filename,
-			severity: diagnostic.category == 0 ? "warning" : "error",
-			lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line-1], lineStarts[lineChar.line]).replace(/\n$/,"").replace(/\r$/,"")
-		});
-		actualErrors++;
+        if (diagnostic.file) {
+            var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
+            var lineStarts = diagnostic.file.getLineStarts();
+            //console.log(diagnostic);
+            problems.push({
+                message: diagnostic.messageText,
+                lineNumber: lineChar.line,
+                characterOffset: lineChar.character,
+                source: diagnostic.file.filename,
+                severity: diagnostic.category == 0 ? "warning" : "error",
+                lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
+            });
+            actualErrors++;
+        }
     });
 	
 
