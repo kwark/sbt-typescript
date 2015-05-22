@@ -18,7 +18,6 @@
 
     var path = require('path');
     var console = require("console");
-    //console.log(__dirname);
 
     var ts = require('./tsc');
 
@@ -28,59 +27,65 @@
 
     var sourceFileMappings = JSON.parse(args[SOURCE_FILE_MAPPINGS_ARG]);
     var options = JSON.parse(args[OPTIONS_ARG]);
-
-    var inputFileName = sourceFileMappings[0][0],
-        outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[0][1]));
-
-    var baseName = path.basename(inputFileName, '.ts');
-    var outputFileName = baseName +".js";
-    var outputFilePath = path.join(outputDirectory, outputFileName);
-    var generatedFiles = [ outputFilePath ];
-
-    //console.log('Output file:', outputFilePath);
-
-    if (options.sourceMap) {
-	    generatedFiles.push(outputFilePath+".map");
-    }
-
     var results = [], problems = [];
 
-    var host = ts.createCompilerHost(options);
-    var program = ts.createProgram([inputFileName], options, host);
-    var checker = ts.createTypeChecker(program, true);
-    var result = checker.emitFiles();
+    for (var i = 0; i < sourceFileMappings.length; i++) {
+        var inputFileName = sourceFileMappings[i][0],
+            outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[i][1]));
 
-    var actualErrors = 0;
-    var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
-    allDiagnostics.forEach(function (diagnostic) {
-        if (diagnostic.file) {
-            var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
-            var lineStarts = diagnostic.file.getLineStarts();
-            //console.log(diagnostic);
-            problems.push({
-                message: diagnostic.messageText,
-                lineNumber: lineChar.line,
-                characterOffset: lineChar.character,
-                source: diagnostic.file.filename,
-                severity: diagnostic.category == 0 ? "warning" : "error",
-                lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
-            });
-            actualErrors++;
+        var baseName = path.basename(inputFileName, '.ts');
+        var outputFileName = baseName + ".js";
+        var outputFilePath = path.join(outputDirectory, outputFileName);
+        var generatedFiles = [outputFilePath];
+
+        if (options.sourceMap) {
+            generatedFiles.push(outputFilePath + ".map");
         }
-    });
-	
 
-	if (actualErrors == 0) {
-		results.push({
-			source: inputFileName,
-			result: {
-				filesRead: [inputFileName],
-				filesWritten: generatedFiles
-			}
-		});
-	}
+        var host = ts.createCompilerHost(options);
+        var program = ts.createProgram([inputFileName], options, host);
+        var checker = ts.createTypeChecker(program, true);
+        var result = checker.emitFiles();
 
-    //console.log(JSON.stringify({results: results, problems: problems}));
+        var actualErrors = 0;
+
+        var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
+        allDiagnostics.forEach(function (diagnostic) {
+            if (diagnostic.file) {
+                var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
+                var lineStarts = diagnostic.file.getLineStarts();
+                problems.push({
+                    message: diagnostic.messageText,
+                    lineNumber: lineChar.line,
+                    characterOffset: lineChar.character,
+                    source: diagnostic.file.filename,
+                    severity: diagnostic.category == 0 ? "warning" : "error",
+                    lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
+                });
+            } else {
+                problems.push({
+                    message: diagnostic.messageText,
+                    lineNumber: 0,
+                    characterOffset: 0,
+                    source: "unknown",
+                    severity: diagnostic.category == 0 ? "warning" : "error",
+                    lineContent: "-"
+                });
+            }
+            actualErrors++;
+        });
+
+        if (actualErrors == 0) {
+            results.push({
+                source: inputFileName,
+                result: {
+                    filesRead: [inputFileName],
+                    filesWritten: generatedFiles
+                }
+            });
+        }
+    }
+
     console.log("\u0010" + JSON.stringify({results: results, problems: problems}));
 
 })();

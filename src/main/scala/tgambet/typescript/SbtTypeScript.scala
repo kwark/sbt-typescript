@@ -12,6 +12,7 @@ object Import {
   object TypeScriptKeys {
 
     val typescript = TaskKey[Seq[File]]("tsext", "Invoke the TypeScript compiler.")
+    val typescriptGenerateCompiler = TaskKey[File]("generateTSC", "Generates the typescript compile script.")
 
     val modules = SettingKey[Seq[String]]("typescript-modules", "A list of file names to be exported as modules (using TypeScript --out parameter).")
 
@@ -41,6 +42,8 @@ object SbtTypeScript extends AutoPlugin {
 
   import com.typesafe.sbt.jse.SbtJsTask.autoImport.JsTaskKeys._
   import tgambet.typescript.SbtTypeScript.autoImport.TypeScriptKeys._
+  import com.typesafe.sbt.web.SbtWeb.autoImport._
+  import WebKeys._
 
   val defaults = Seq(
     modules := Seq.empty,
@@ -53,9 +56,8 @@ object SbtTypeScript extends AutoPlugin {
 
   val typeScriptSettings = Seq(
 
-    includeFilter := "*.ts",
-
-    excludeFilter := "*.d.ts",
+    includeFilter in typescript := GlobFilter("*.ts"),
+    excludeFilter in typescript := GlobFilter("*.d.ts"),
 
     jsOptions := JsObject(
       "outDir" -> JsString((resourceManaged in typescript in Assets).value.getAbsolutePath),
