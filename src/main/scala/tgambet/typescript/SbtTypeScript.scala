@@ -1,6 +1,7 @@
 package tgambet.typescript
 
 import com.typesafe.sbt.jse.SbtJsTask
+import com.typesafe.sbt.jse.JsEngineImport.JsEngineKeys
 import com.typesafe.sbt.web.Import._
 import me.fornever.ResourceHelper
 import sbt.Keys._
@@ -51,7 +52,8 @@ object SbtTypeScript extends AutoPlugin {
     sourceMap := false,
     moduleType := ModuleType.Amd,
     noImplicitAny := false,
-    removeComments := false
+    removeComments := false,
+    JsEngineKeys.parallelism := 1 //Typescript compiler only works when running only a single instance
   )
 
   val typeScriptSettings = Seq(

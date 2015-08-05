@@ -8,10 +8,8 @@
  * 1 - filepath of this script (unused)
  * 2 - array of file paths to the files to be converted
  * 3 - the target folder to write to (unused - not required)
- * 4 - jshint options as a Json object
+ * 4 - tsc options as a Json object
  *
- * Json array tuples are sent to stdout for each file in error (if any). Each tuple is an array where the
- * element 0 corresponds to the file path of the file linted, and element 1 is JSHINT.errors.
  */
 (function () {
     "use strict";
@@ -28,54 +26,53 @@
     var sourceFileMappings = JSON.parse(args[SOURCE_FILE_MAPPINGS_ARG]);
     var options = JSON.parse(args[OPTIONS_ARG]);
     var results = [], problems = [];
+    var inputFileNames = [];
 
     for (var i = 0; i < sourceFileMappings.length; i++) {
-        var inputFileName = sourceFileMappings[i][0],
-            outputDirectory = path.join(options.outDir, path.dirname(sourceFileMappings[i][1]));
+        inputFileNames.push(sourceFileMappings[i][0]);
+    }
 
-        var baseName = path.basename(inputFileName, '.ts');
-        var outputFileName = baseName + ".js";
-        var outputFilePath = path.join(outputDirectory, outputFileName);
-        var generatedFiles = [outputFilePath];
+    var host = ts.createCompilerHost(options);
+    var program = ts.createProgram(inputFileNames, options, host);
+    var checker = ts.createTypeChecker(program, true);
+    var result = checker.emitFiles();
 
-        if (options.sourceMap) {
-            generatedFiles.push(outputFilePath + ".map");
+    var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
+    var actualErrors = 0;
+    allDiagnostics.forEach(function (diagnostic) {
+        if (diagnostic.file) {
+            var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
+            var lineStarts = diagnostic.file.getLineStarts();
+            problems.push({
+                message: diagnostic.messageText,
+                lineNumber: lineChar.line,
+                characterOffset: lineChar.character,
+                source: diagnostic.file.filename,
+                severity: diagnostic.category == 0 ? "warning" : "error",
+                lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
+            });
+        } else {
+            problems.push({
+                message: diagnostic.messageText,
+                lineNumber: 0,
+                characterOffset: 0,
+                source: "unknown",
+                severity: diagnostic.category == 0 ? "warning" : "error",
+                lineContent: "-"
+            });
         }
+        actualErrors++;
+    });
+    if (actualErrors == 0) {
+        sourceFileMappings.forEach(function(sourceFileMapping) {
+            var inputFileName = sourceFileMapping[0];
+			var outputDirectory = path.join(options.outDir, path.dirname(sourceFileMapping[1]));
+            var outputFilePath = path.join(outputDirectory, path.basename(inputFileName, '.ts') + ".js");
+            var generatedFiles = [outputFilePath];
 
-        var host = ts.createCompilerHost(options);
-        var program = ts.createProgram([inputFileName], options, host);
-        var checker = ts.createTypeChecker(program, true);
-        var result = checker.emitFiles();
-
-        var actualErrors = 0;
-
-        var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
-        allDiagnostics.forEach(function (diagnostic) {
-            if (diagnostic.file) {
-                var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
-                var lineStarts = diagnostic.file.getLineStarts();
-                problems.push({
-                    message: diagnostic.messageText,
-                    lineNumber: lineChar.line,
-                    characterOffset: lineChar.character,
-                    source: diagnostic.file.filename,
-                    severity: diagnostic.category == 0 ? "warning" : "error",
-                    lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
-                });
-            } else {
-                problems.push({
-                    message: diagnostic.messageText,
-                    lineNumber: 0,
-                    characterOffset: 0,
-                    source: "unknown",
-                    severity: diagnostic.category == 0 ? "warning" : "error",
-                    lineContent: "-"
-                });
+            if (options.sourceMap) {
+                generatedFiles.push(outputFilePath + ".map");
             }
-            actualErrors++;
-        });
-
-        if (actualErrors == 0) {
             results.push({
                 source: inputFileName,
                 result: {
@@ -83,7 +80,7 @@
                     filesWritten: generatedFiles
                 }
             });
-        }
+        });
     }
 
     console.log("\u0010" + JSON.stringify({results: results, problems: problems}));
