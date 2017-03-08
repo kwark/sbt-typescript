@@ -34,26 +34,35 @@
 
     var host = ts.createCompilerHost(options);
     var program = ts.createProgram(inputFileNames, options, host);
-    var checker = ts.createTypeChecker(program, true);
-    var result = checker.emitFiles();
+    var result = program.emit();
 
-    var allDiagnostics = program.getDiagnostics().concat(checker.getDiagnostics()).concat(result.diagnostics);
+    var diagnostics = program.getSyntacticDiagnostics();
+    // If we didn't have any syntactic errors, then also try getting the global and
+    // semantic errors.
+    if (diagnostics.length === 0) {
+        diagnostics = program.getOptionsDiagnostics().concat(program.getGlobalDiagnostics());
+        if (diagnostics.length === 0) {
+            diagnostics = program.getSemanticDiagnostics();
+        }
+    }
+
+    var allDiagnostics = diagnostics.concat(result.diagnostics);
     var actualErrors = 0;
     allDiagnostics.forEach(function (diagnostic) {
         if (diagnostic.file) {
-            var lineChar = diagnostic.file.getLineAndCharacterFromPosition(diagnostic.start);
-            var lineStarts = diagnostic.file.getLineStarts();
+            var lineChar = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
+            var lineStarts = ts.getLineStarts(diagnostic.file);
             problems.push({
-                message: diagnostic.messageText,
+                message: ts.flattenDiagnosticMessageText(diagnostic.messageText),
                 lineNumber: lineChar.line,
                 characterOffset: lineChar.character,
-                source: diagnostic.file.filename,
+                source: diagnostic.file.fileName,
                 severity: diagnostic.category == 0 ? "warning" : "error",
                 lineContent: diagnostic.file.text.substring(lineStarts[lineChar.line - 1], lineStarts[lineChar.line]).replace(/\n$/, "").replace(/\r$/, "")
             });
         } else {
             problems.push({
-                message: diagnostic.messageText,
+                message: ts.flattenDiagnosticMessageText(diagnostic.messageText),
                 lineNumber: 0,
                 characterOffset: 0,
                 source: "unknown",

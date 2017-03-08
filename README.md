@@ -2,41 +2,23 @@ sbt-typescript
 ================
 
 An SBT plugin to run the [TypeScript](http://www.typescriptlang.org/) compiler inside of SBT.
+The Typescript compiler is modified to generate ExtJs compatible classes. 
+The actual tsc.js compiler is provided by this [fork](https://github.com/fabioparra/TypeScript).
 
-To use this plugin download and build it yourself.
+Currently it supports typescript 1.8
+
+To use this plugin add the following to your `plugins.sbt` file:
+
+    addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.0")
+    addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.4")
+    addSbtPlugin("be.venneborg.sbt" % "sbt-typescript-extjs" % "1.0.0-SNAPSHOT")
 
 This plugin is compatible with [sbt-web](https://github.com/sbt/sbt-web).
 
 Usage
 =====
 
-Simply run the `tsc` command to invoke the TypeScript compiler. No surprises :
-
-```
-> tsc
-[info] Version 1.0.1.0
-[info] Syntax:   tsc [options] [file ..]
-[info]
-[info] Examples: tsc hello.ts
-[info]           tsc --out foo.js foo.ts
-[info]           tsc @args.txt
-[info]
-[info] Options:
-[info]   -d, --declaration             Generates corresponding .d.ts file.
-[info]   -h, --help                    Print this message.
-[info]   --mapRoot LOCATION            Specifies the location where debugger should locate map files instead of generated locations.
-[info]   -m KIND, --module KIND        Specify module code generation: 'commonjs' or 'amd'
-[info]   --noImplicitAny               Warn on expressions and declarations with an implied 'any' type.
-[info]   --out FILE                    Concatenate and emit output to single file.
-[info]   --outDir DIRECTORY            Redirect output structure to the directory.
-[info]   --removeComments              Do not emit comments to output.
-[info]   --sourcemap                   Generates corresponding .map file.
-[info]   --sourceRoot LOCATION         Specifies the location where debugger should locate TypeScript files instead of source locations.
-[info]   -t VERSION, --target VERSION  Specify ECMAScript target version: 'ES3' (default), or 'ES5'
-[info]   -v, --version                 Print the compiler's version: 1.0.1.0
-[info]   -w, --watch                   Watch input files.
-[info]   @<file>                       Insert command line options and files from a file.
-```
+Simply run the `tsext` command to invoke the TypeScript compiler.
 
 Use with sbt-web
 ================
@@ -63,7 +45,7 @@ Supported settings:
 
 * `removeComments` When set, do not emit comments to output. Defaults to `false`.
 
-  `TypeScriptKeys.targetES5 := true`
+  `TypeScriptKeys.removeComments := true`
 
 * `moduleType` Specify module code generation: Can be 'Commonjs' or 'Amd'. Defaults to `Amd`.
 
@@ -72,6 +54,3 @@ Supported settings:
 
 The plugin is built on top of [JavaScript Engine](https://github.com/typesafehub/js-engine) which supports different JavaScript runtimes.
 
-KNOW ISSUES:
-* Contrary to other sbt-web plugins this one does not (yet) run incrementally. A local Node instance is advised for performance.
-* Still young and not extensively tested.

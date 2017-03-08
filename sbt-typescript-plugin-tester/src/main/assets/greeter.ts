@@ -1,9 +1,9 @@
 ﻿// From http://www.typescriptlang.org/Tutorial
-function greeter(person: strinng) {
+function greeter(person: string) {
     return "Hello, " + person;
 }
 
-function greeter2(person: strinng) {
+function greeter2(person: string) {
     return "Hello, " + person;
 }
 

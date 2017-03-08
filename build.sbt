@@ -1,10 +1,14 @@
+import bintray.Keys._
+
 sbtPlugin := true
 
-organization := "com.typesafe.sbt"
+organization := "be.venneborg.sbt"
 
 name := "sbt-typescript-extjs"
 
-version := "0.0.1"
+description := "sbt plugin that transpiles typescript files to extjs compatible javascript classes"
+
+version := "1.0.0-SNAPSHOT"
 
 scalaVersion := "2.10.4"
 
@@ -17,22 +21,19 @@ resolvers ++= Seq(
   "Typesafe Snapshots Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 )
 
+bintrayPublishSettings
+
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+
+publishMavenStyle := false
+
+repository in bintray := "sbt-plugins"
+
+bintrayOrganization in bintray := None
+
 libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.0.2")
-
-publishMavenStyle := true
-
-publishTo <<= version {
-  (v: String) =>
-    val nexus = "https://collab.mow.vlaanderen.be/nexus/content/repositories/"
-    if (v.trim.endsWith("SNAPSHOT"))
-      Some("dev-colab snapshots" at nexus + "snapshots")
-    else
-      Some("dev-colab releases" at nexus + "releases")
-}
-
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.4")
 
 scriptedSettings
 
