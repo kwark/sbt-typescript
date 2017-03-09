@@ -1,4 +1,4 @@
-package me.fornever
+package be.venneborg
 
 import java.io.{ByteArrayInputStream, InputStream, SequenceInputStream}
 

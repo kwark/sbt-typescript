@@ -1,31 +1,33 @@
-package tgambet.typescript
+package be.venneborg.typescript
 
-import com.typesafe.sbt.jse.SbtJsTask
+import be.venneborg.ResourceHelper
 import com.typesafe.sbt.jse.JsEngineImport.JsEngineKeys
-import com.typesafe.sbt.web.Import._
-import me.fornever.ResourceHelper
+import com.typesafe.sbt.jse.SbtJsTask
 import sbt.Keys._
 import sbt._
-import spray.json.{JsBoolean, JsObject, JsString}
+import spray.json.{JsBoolean, JsNumber, JsObject, JsString}
 
 object Import {
 
   object TypeScriptKeys {
 
-    val typescript = TaskKey[Seq[File]]("tsext", "Invoke the TypeScript compiler.")
-    val typescriptGenerateCompiler = TaskKey[File]("generateTSC", "Generates the typescript compile script.")
+    val typescript = TaskKey[Seq[File]]("tsc", "Invoke the TypeScript compiler.")
 
     val modules = SettingKey[Seq[String]]("typescript-modules", "A list of file names to be exported as modules (using TypeScript --out parameter).")
 
-    val targetES5 = SettingKey[Boolean]("typescript-opt-target", "Whether TypeScript should target ECMAScript 5. False by default (ES3).")
+    val esTarget = SettingKey[EsTarget.Value]("typescript-opt-target", "The ECMAScript version TypeScript should target: by default ES5.")
+
+    object EsTarget extends Enumeration {
+      val ES3, ES5, ES6 = Value
+    }
 
     val sourceMap = SettingKey[Boolean]("typescript-opt-sourceMap", "Whether TypeScript should generate corresponding .map files.")
 
     object ModuleType extends Enumeration {
-      val Amd, CommonJs = Value
+      val None, Amd, CommonJs, ExtJs, ES6, Umd, System = Value
     }
 
-    val moduleType = SettingKey[ModuleType.Value]("typescript-opt-module", "Specify module code generation: 'Commonjs' or 'Amd'")
+    val moduleType = SettingKey[ModuleType.Value]("typescript-opt-module", "Specify module code generation: 'None', 'Commonjs' or 'Amd', 'Umd', 'System', 'ES6' or 'ExtJs' (default CommonJs)")
 
     val noImplicitAny = SettingKey[Boolean]("typescript-opt-noImplicitAny", "Warn on expressions and declarations with an implied 'any' type.")
 
@@ -42,15 +44,14 @@ object SbtTypeScript extends AutoPlugin {
   val autoImport = Import
 
   import com.typesafe.sbt.jse.SbtJsTask.autoImport.JsTaskKeys._
-  import tgambet.typescript.SbtTypeScript.autoImport.TypeScriptKeys._
+  import be.venneborg.typescript.SbtTypeScript.autoImport.TypeScriptKeys._
   import com.typesafe.sbt.web.SbtWeb.autoImport._
-  import WebKeys._
 
   val defaults = Seq(
     modules := Seq.empty,
-    targetES5 := false,
+    esTarget := EsTarget.ES5,
     sourceMap := false,
-    moduleType := ModuleType.Amd,
+    moduleType := ModuleType.CommonJs,
     noImplicitAny := false,
     removeComments := false,
     JsEngineKeys.parallelism := 1 //Typescript compiler only works when running only a single instance
@@ -63,13 +64,22 @@ object SbtTypeScript extends AutoPlugin {
 
     jsOptions := JsObject(
       "outDir" -> JsString((resourceManaged in typescript in Assets).value.getAbsolutePath),
-      "targetES5" -> JsBoolean((targetES5 in Assets).value),
+      "target" -> JsNumber((esTarget in Assets).value match {
+        case EsTarget.ES3 => 0
+        case EsTarget.ES5 => 1
+        case EsTarget.ES6 => 2
+      }),
       "sourceMap" -> JsBoolean((sourceMap in Assets).value),
       "noImplicitAny" -> JsBoolean((noImplicitAny in Assets).value),
       "removeComments" -> JsBoolean((removeComments in Assets).value),
-      "module" -> JsString((moduleType in Assets).value match {
-        case ModuleType.Amd => "amd"
-        case ModuleType.CommonJs => "commonjs"
+      "module" -> JsNumber((moduleType in Assets).value match {
+        case ModuleType.None => 0
+        case ModuleType.CommonJs => 1
+        case ModuleType.Amd => 2
+        case ModuleType.Umd => 3
+        case ModuleType.System => 4
+        case ModuleType.ES6 => 5
+        case ModuleType.ExtJs => 99
       })
     ).toString()
   )
@@ -80,6 +90,12 @@ object SbtTypeScript extends AutoPlugin {
         ResourceHelper.copyResourceTo(
           (target in Plugin).value / moduleName.value,
           getClass.getClassLoader.getResource("typescript/lib.d.ts"),
+          streams.value.cacheDirectory / "copy-resource"
+        )
+
+        ResourceHelper.copyResourceTo(
+          (target in Plugin).value / moduleName.value,
+          getClass.getClassLoader.getResource("typescript/lib.es6.d.ts"),
           streams.value.cacheDirectory / "copy-resource"
         )
 
@@ -98,7 +114,7 @@ object SbtTypeScript extends AutoPlugin {
     inConfig(Assets)(typeScriptSettings) ++
     inConfig(TestAssets)(typeScriptSettings) ++
     Seq(
-      moduleName := "tsext",
+      moduleName := "tsc",
       shellFile := getClass.getClassLoader.getResource("typescript/sbt-typescript.js"),
 
       taskMessage in Assets := "TypeScript compiling",

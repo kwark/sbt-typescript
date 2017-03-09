@@ -25,6 +25,7 @@
 
     var sourceFileMappings = JSON.parse(args[SOURCE_FILE_MAPPINGS_ARG]);
     var options = JSON.parse(args[OPTIONS_ARG]);
+
     var results = [], problems = [];
     var inputFileNames = [];
 
@@ -32,8 +33,7 @@
         inputFileNames.push(sourceFileMappings[i][0]);
     }
 
-    var host = ts.createCompilerHost(options);
-    var program = ts.createProgram(inputFileNames, options, host);
+    var program = ts.createProgram(inputFileNames, options);
     var result = program.emit();
 
     var diagnostics = program.getSyntacticDiagnostics();

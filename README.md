@@ -2,8 +2,9 @@ sbt-typescript
 ================
 
 An SBT plugin to run the [TypeScript](http://www.typescriptlang.org/) compiler inside of SBT.
-The Typescript compiler is modified to generate ExtJs compatible classes. 
-The actual tsc.js compiler is provided by this [fork](https://github.com/fabioparra/TypeScript).
+
+The Typescript compiler is provided by this [fork](https://github.com/fabioparra/TypeScript).
+This fork also supports compilation of typescript classes to ExtJs classes.
 
 Currently it supports typescript 1.8
 
@@ -18,7 +19,7 @@ This plugin is compatible with [sbt-web](https://github.com/sbt/sbt-web).
 Usage
 =====
 
-Simply run the `tsext` command to invoke the TypeScript compiler.
+Simply run the `tsc` command to invoke the TypeScript compiler.
 
 Use with sbt-web
 ================
@@ -47,7 +48,7 @@ Supported settings:
 
   `TypeScriptKeys.removeComments := true`
 
-* `moduleType` Specify module code generation: Can be 'Commonjs' or 'Amd'. Defaults to `Amd`.
+* `moduleType` Specify module code generation: Can be 'ExtJs', 'Commonjs' or 'Amd'. Defaults to `ExtJs`.
 
   `TypeScriptKeys.moduleType in Assets := TypeScriptKeys.ModuleType.Amd`
   `TypeScriptKeys.moduleType in TestAssets := TypeScriptKeys.ModuleType.CommonJs`
