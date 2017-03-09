@@ -8,7 +8,7 @@ name := "sbt-typescript-extjs"
 
 description := "sbt plugin that transpiles typescript files to extjs compatible javascript classes"
 
-version := "1.0.0-SNAPSHOT"
+version := "1.0.0"
 
 scalaVersion := "2.10.4"
 
