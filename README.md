@@ -36,9 +36,9 @@ Supported settings:
 
   `TypeScriptKeys.sourceMap := true`
 
-* `targetES5` When set, target ECMAScript 5. Defaults to `false` (target ECMAScript 3).
+* `esTarget` Which ECMAScript version to transpile to . Defaults to `ES5`.
 
-  `TypeScriptKeys.targetES5 := true`
+  `TypeScriptKeys.esTarget := 'ES5'`
 
 * `noImplicitAny` When set, warn on expressions and declarations with an implied 'any' type. Default to `false`.
 

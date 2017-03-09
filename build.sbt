@@ -4,9 +4,9 @@ sbtPlugin := true
 
 organization := "be.venneborg.sbt"
 
-name := "sbt-typescript-extjs"
+name := "sbt-typescript"
 
-description := "sbt plugin that transpiles typescript files to extjs compatible javascript classes"
+description := "sbt plugin that transpiles typescript files to javascript classes"
 
 version := "1.0.0"
 
