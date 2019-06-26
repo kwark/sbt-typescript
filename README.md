@@ -12,7 +12,7 @@ To use this plugin add the following to your `plugins.sbt` file:
 
     addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.4")
     addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.2.3")
-    addSbtPlugin("be.venneborg.sbt" % "sbt-typescript-extjs" % "1.1.0-SNAPSHOT")
+    addSbtPlugin("be.venneborg.sbt" % "sbt-typescript" % "1.1.0")
 
 This plugin is compatible with [sbt-web](https://github.com/sbt/sbt-web).
 

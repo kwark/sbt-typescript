@@ -2,7 +2,7 @@ organization := "be.venneborg.sbt"
 
 description := "sbt plugin that transpiles typescript files to javascript classes"
 
-version := "1.1.0-SNAPSHOT"
+version := "1.1.0"
 
 scalacOptions += "-feature"
 
@@ -28,7 +28,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.2.3")
 lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin)
   .settings(
-    name := "sbt-typescript-extjs",
+    name := "sbt-typescript",
     scriptedLaunchOpts := { scriptedLaunchOpts.value ++
       Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
     },
