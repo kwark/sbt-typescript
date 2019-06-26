@@ -10,9 +10,9 @@ Currently it supports typescript 1.8
 
 To use this plugin add the following to your `plugins.sbt` file:
 
-    addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.0")
-    addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.4")
-    addSbtPlugin("be.venneborg.sbt" % "sbt-typescript-extjs" % "1.0.0-SNAPSHOT")
+    addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.4")
+    addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.2.3")
+    addSbtPlugin("be.venneborg.sbt" % "sbt-typescript-extjs" % "1.1.0-SNAPSHOT")
 
 This plugin is compatible with [sbt-web](https://github.com/sbt/sbt-web).
 

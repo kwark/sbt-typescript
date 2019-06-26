@@ -1,16 +1,8 @@
-import bintray.Keys._
-
-sbtPlugin := true
-
 organization := "be.venneborg.sbt"
-
-name := "sbt-typescript"
 
 description := "sbt plugin that transpiles typescript files to javascript classes"
 
-version := "1.0.0"
-
-scalaVersion := "2.10.4"
+version := "1.1.0-SNAPSHOT"
 
 scalacOptions += "-feature"
 
@@ -21,21 +13,25 @@ resolvers ++= Seq(
   "Typesafe Snapshots Repository" at "http://repo.typesafe.com/typesafe/snapshots/"
 )
 
-bintrayPublishSettings
-
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
 publishMavenStyle := false
 
-repository in bintray := "sbt-plugins"
+bintrayRepository := "sbt-plugins"
 
-bintrayOrganization in bintray := None
+bintrayOrganization := None
 
-libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
+//libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.3"
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.1.4")
+addSbtPlugin("com.typesafe.sbt" % "sbt-js-engine" % "1.2.3")
 
-scriptedSettings
-
-scriptedLaunchOpts <+= version apply { v => s"-Dproject.version=$v" }
+lazy val root = (project in file("."))
+  .enablePlugins(SbtPlugin)
+  .settings(
+    name := "sbt-typescript-extjs",
+    scriptedLaunchOpts := { scriptedLaunchOpts.value ++
+      Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+    },
+    scriptedBufferLog := false
+  )
 

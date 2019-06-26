@@ -85,29 +85,16 @@ object SbtTypeScript extends AutoPlugin {
   )
 
   override def projectSettings = defaults ++ inTask(typescript)(
-    SbtJsTask.jsTaskSpecificUnscopedSettings ++ Seq(
+    SbtJsTask.jsTaskSpecificUnscopedProjectSettings ++ Seq(
       shellSource := {
-        ResourceHelper.copyResourceTo(
+        ResourceHelper.copyResourcesTo(
           (target in Plugin).value / moduleName.value,
-          getClass.getClassLoader.getResource("typescript/lib.d.ts"),
-          streams.value.cacheDirectory / "copy-resource"
-        )
-
-        ResourceHelper.copyResourceTo(
-          (target in Plugin).value / moduleName.value,
-          getClass.getClassLoader.getResource("typescript/lib.es6.d.ts"),
-          streams.value.cacheDirectory / "copy-resource"
-        )
-
-        ResourceHelper.copyResourceTo(
-          (target in Plugin).value / moduleName.value,
-          getClass.getClassLoader.getResource("typescript/tsc.js"),
-          streams.value.cacheDirectory / "copy-resource"
-        )
-
-        ResourceHelper.copyResourceTo(
-          (target in Plugin).value / moduleName.value,
-          shellFile.value,
+          Seq(
+            getClass.getClassLoader.getResource("typescript/lib.d.ts"),
+            getClass.getClassLoader.getResource("typescript/lib.es6.d.ts"),
+            getClass.getClassLoader.getResource("typescript/tsc.js"),
+            shellFile.value
+          ),
           streams.value.cacheDirectory / "copy-resource"
         )
       }) ++
